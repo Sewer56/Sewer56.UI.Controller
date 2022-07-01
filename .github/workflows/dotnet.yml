@@ -97,6 +97,6 @@ jobs:
         $items = Get-ChildItem -Path "./*.nupkg" -Recurse
         Foreach ($item in $items)
         {
-            Write-Host "Pushing $item"
-            dotnet nuget push "$item" -k "$env:NUGET_KEY" -s "https://api.nuget.org/v3/index.json" --skip-duplicate
+            Write-Host "& dotnet nuget push `"$item`" -s `"https://api.nuget.org/v3/index.json`" --skip-duplicate"
+            & dotnet nuget push "$item" -k "$env:NUGET_KEY" -s "https://api.nuget.org/v3/index.json" --skip-duplicate
         }
