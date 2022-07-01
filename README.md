@@ -6,8 +6,8 @@
     <i>Made for Reloaded II, opened to all.</i>
 	<br/> <br/>
 	<!-- NuGet -->
-	<a href="https://www.nuget.org/packages/Sewer56.UI.Controller">
-		<img src="https://img.shields.io/nuget/v/Sewer56.UI.Controller.svg" alt="NuGet" />
+	<a href="https://www.nuget.org/packages/Sewer56.UI.Controller.Core">
+		<img src="https://img.shields.io/nuget/v/Sewer56.UI.Controller.Core.svg" alt="NuGet" />
 	</a>
 </div>
 
@@ -43,7 +43,7 @@ Sewer56.UI.Controller consists of 3 modules:
 ## Available Packages
 
 - [Sewer56.UI.Controller.WPF](https://www.nuget.org/packages/Sewer56.UI.Controller.WPF): Adds basic WPF support to the library.  
-- [Sewer56.UI.Controller.ReloadedInput](https://www.nuget.org/packages/Sewer56.UI.Controller.WPF): Adds `Reloaded.Input` support to the library.  
+- [Sewer56.UI.Controller.ReloadedInput](https://www.nuget.org/packages/Sewer56.UI.Controller.ReloadedInput): Adds `Reloaded.Input` support to the library.  
 - [Sewer56.UI.Controller.ReloadedInput.Configurator](https://www.nuget.org/packages/Sewer56.UI.Controller.ReloadedInput.Configurator): Adds the `Reloaded.Input` Configurator to this library.  
 
 ### .ReloadedInput Usage Guide
