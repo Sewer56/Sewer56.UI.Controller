@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sewer56.UI.Controller.Core\Sewer56.UI.Controller.Core.csproj" />
+    <ProjectReference Include="..\Submodules\Reloaded.Input\Reloaded.Input.Configurator\Reloaded.Input.Configurator.csproj" />
+    <ProjectReference Include="..\Submodules\Reloaded.Input\Reloaded.Input\Reloaded.Input.csproj" />
+  </ItemGroup>
+
+</Project>
