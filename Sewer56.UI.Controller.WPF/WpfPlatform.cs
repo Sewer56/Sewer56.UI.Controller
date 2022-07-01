@@ -27,7 +27,7 @@ public class WpfPlatform : IPlatform, IDisposable
     /// <summary>
     /// Subscribe to this event from your application for custom input processing.
     /// </summary>
-    public Action<ControllerState> ProcessCustomInputs = state => { };
+    public ProcessCustomInputsDelegate ProcessCustomInputs = (in ControllerState state) => { };
 
     /// <inheritdoc />
     public event Action OnUpdate = () => {};
@@ -163,4 +163,10 @@ public class WpfPlatform : IPlatform, IDisposable
     }
 
     private void OnRendering(object? sender, EventArgs e) => OnUpdate.Invoke();
+
+    /// <summary>
+    /// Delegate which 
+    /// </summary>
+    /// <param name="state">The current state of the controller.</param>
+    public delegate void ProcessCustomInputsDelegate(in ControllerState state);
 }
