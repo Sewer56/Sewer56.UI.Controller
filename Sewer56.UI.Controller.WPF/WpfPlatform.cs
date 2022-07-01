@@ -121,7 +121,7 @@ public class WpfPlatform : IPlatform, IDisposable
             return buffer[..];
 
         var spanList = new SpanList<UIElement>(_childrenBuffer);
-        FindSelectableChildren(window!, element, ref spanList);
+        FindSelectableChildren(window!, element!, ref spanList);
 
         // Extract positions.
         ref var items = ref spanList.Items;
@@ -130,7 +130,7 @@ public class WpfPlatform : IPlatform, IDisposable
         {
             buffer[itemsInBuffer++] = items[x].TransformToAncestor(window!)
                 .Transform(new Point(0, 0))
-                .AsVector() + (element.RenderSize.AsVector() / 2); // Take element center
+                .AsVector() + (element!.RenderSize.AsVector() / 2); // Take element center
         }
 
         return buffer[..itemsInBuffer];
