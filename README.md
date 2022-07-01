@@ -38,13 +38,32 @@ That's all you need to do, just keep the Navigator around so it doesn't get garb
 Sewer56.UI.Controller consists of 3 modules:  
 - Core: The core library, contained in `Sewer56.UI.Controller.Core`.  
 - IPlatform: Abstracts a UI platform like WPF or WinForms. (e.g. `Sewer56.UI.Controller.WPF`).  
-- IController: Provides input support to the library. (e.g. `Sewer56.UI.Controller.ReloadedInput`)
+- IController: Provides input support to the library. (e.g. `Sewer56.UI.Controller.ReloadedInput`)  
 
 ## Available Packages
 
 - [Sewer56.UI.Controller.WPF](https://www.nuget.org/packages/Sewer56.UI.Controller.WPF): Adds basic WPF support to the library.  
 - [Sewer56.UI.Controller.ReloadedInput](https://www.nuget.org/packages/Sewer56.UI.Controller.WPF): Adds `Reloaded.Input` support to the library.  
 - [Sewer56.UI.Controller.ReloadedInput.Configurator](https://www.nuget.org/packages/Sewer56.UI.Controller.ReloadedInput.Configurator): Adds the `Reloaded.Input` Configurator to this library.  
+
+### .ReloadedInput Usage Guide
+
+Consider first becoming familiar with the [basic Reloaded.Input usage here](https://github.com/Sewer56/Reloaded.Input#usage).  
+
+The `ReloadedInputController` class exports the methods:  
+- `MapButton`: Maps a button to a button.  
+- `MapTriggerToButton`: Maps a controller trigger to a button.  [Activates if >50% pressed]  
+- `MapCustomStickBehaviour`: Maps a stick to a button.  [Activates if >75% moved]  
+
+And cooresponding `UnMap` functions.  
+
+### .ReloadedInput.Configurator Usage Guide
+
+Use `ReloadedInputControllerWithConfigurator` as your `IController`.  
+Call the `Configure` method to show the WPF powered configuration screen.  
+
+Note: Configurator built with Reloaded II's Default Theme in mind.  
+Mileage may vary with custom themes.  
 
 ## Structure of Sewer56.UI.Controller
 

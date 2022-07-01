@@ -66,7 +66,6 @@ public class ReloadedInputControllerWithConfigurator : ReloadedInputController
         }
     }
     
-
     private void RecreateController()
     {
         Controller?.Dispose();
