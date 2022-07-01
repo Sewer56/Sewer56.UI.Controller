@@ -16,6 +16,7 @@ public class Navigator
     private readonly IPlatform _platform;
     private readonly IController _controller;
     private ControllerState _state;
+    private DateTime _lastDateTime = DateTime.UtcNow;
 
     /// <summary>
     /// Creates an instance of the navigator.
@@ -36,7 +37,7 @@ public class Navigator
             return;
 
         ref var state = ref _state;
-        if (state.PressedButtons.HasMovementButtons() && !state.IsButtonHeld(Button.Modifier))
+        if (state.NavigationButtons.HasMovementButtons() && !state.IsButtonHeld(Button.Modifier))
             OnUpdate_Movement(ref state);
 
         _platform.ProcessInputs(state);
@@ -73,9 +74,14 @@ public class Navigator
     /// </summary>
     private bool PollInputs()
     {
+        // Normally we'd set lastDateTime here if never set but it's okay not to
+        // due to implementation details of State Update.
+        var currentTime = DateTime.UtcNow;
+        var deltaTime = currentTime - _lastDateTime;
+        _lastDateTime = currentTime;
         var inputs    = _controller.GetInputs();
         var stateCopy = _state;
-        _state.Update(inputs);
+        _state.Update(inputs, (float)deltaTime.TotalMilliseconds);
         return !_state.Equals(stateCopy);
     }
 }
