@@ -6,6 +6,13 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <Title>Sewer's UI Library: Basic WPF Support</Title>
+    <Description>Integrates the Reloaded.Input library (configurator included) with Sewer56.UI.Controller. </Description>
+    <PackageProjectUrl>https://github.com/Sewer56/Sewer56.UI.Controller</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Sewer56/Sewer56.UI.Controller</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
