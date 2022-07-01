@@ -6,8 +6,9 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-    <Title>Sewer's UI Library: Controller Support [Reloaded.Input]</Title>
-    <Description>Integrates the Reloaded.Input library with Sewer56.UI.Controller. </Description>
+    <Nullable>enable</Nullable>
+    <Title>Sewer's UI Library: Controller Support [Reloaded.Input + Configurator]</Title>
+    <Description>Integrates the Reloaded.Input library [with Configurator] with Sewer56.UI.Controller. </Description>
     <PackageProjectUrl>https://github.com/Sewer56/Sewer56.UI.Controller</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Sewer56/Sewer56.UI.Controller</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -17,15 +18,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Reloaded.Input" Version="2.0.0" />
+    <PackageReference Include="Reloaded.Input.Configurator" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sewer56.UI.Controller.Core\Sewer56.UI.Controller.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Structures\" />
+    <ProjectReference Include="..\Sewer56.UI.Controller.ReloadedInput\Sewer56.UI.Controller.ReloadedInput.csproj" />
   </ItemGroup>
 
 </Project>

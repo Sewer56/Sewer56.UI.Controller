@@ -1,49 +1,56 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Reloaded.Input;
-using Reloaded.Input.Configurator;
-using Reloaded.Input.Configurator.WPF;
 using Reloaded.Input.Structs;
 using Sewer56.UI.Controller.Core.Enums;
 using Sewer56.UI.Controller.Core.Interfaces;
 using Sewer56.UI.Controller.Core.Structures;
+using Sewer56.UI.Controller.ReloadedInput.Enums;
 
 namespace Sewer56.UI.Controller.ReloadedInput;
 
 /// <summary>
-/// A controller that abstracts the Reloaded.Hooks library.
+/// A controller that abstracts the Reloaded.Input library.
 /// </summary>
 public class ReloadedInputController : IController, IDisposable
 {
-    private static readonly Button[] _buttonValues = ButtonExtensions.GetValues();
-    private static readonly int _triggerMinMappingIndex = 256;
-    private static readonly int _customMappingIndex_Stick = 512;
+    /// <summary>
+    /// All possible button values.
+    /// </summary>
+    public static readonly Button[] ButtonValues = ButtonExtensions.GetValues();
 
-    private static readonly StickMappingEntry[] _customMapEntries_Stick = new StickMappingEntry[]
-    {
-        new StickMappingEntry()
-        {
-            Entry = new MappingEntry("Menu Left/Right [Stick]", _customMappingIndex_Stick + 0, MappingType.Axis, "Navigates the Menu Left/Right"),
-            ValueOnNegative = Button.Left,
-            ValueOnPositive = Button.Right
-        },
-        new StickMappingEntry()
-        {
-            Entry = new MappingEntry("Menu Up/Down [Stick]", _customMappingIndex_Stick + 1, MappingType.Axis, "Navigates the Menu Up/Down"),
-            ValueOnNegative = Button.Down,
-            ValueOnPositive = Button.Up
-        }
-    };
+    /// <summary>
+    /// All possible button names.
+    /// </summary>
+    public static readonly string[] ButtonNames = ButtonExtensions.GetNames();
 
-    private VirtualController _controller;
+    /// <summary>
+    /// The mapping index where the entries for mapping buttons to buttons start.
+    /// </summary>
+    public const int IndexButtonButtons = 0;
+
+    /// <summary>
+    /// The mapping index where the entries for mapping triggers to buttons (<see cref="Button"/>) start.
+    /// </summary>
+    public const int IndexTriggerButtons = 256;
+
+    /// <summary>
+    /// The mapping index where the custom stick mappings (<see cref="Enums.CustomStickMappingEntry"/>) start.
+    /// </summary>
+    public const int IndexCustomStickMapping = 512;
+
+    /// <summary>
+    /// The underlying controller instance.
+    /// </summary>
+    public VirtualController Controller;
 
     /// <summary>
     /// Creates a Reloaded.Hooks controller from a given instance.
     /// </summary>
     /// <param name="configPath"></param>
-    public ReloadedInputController(string configPath) => _controller = new VirtualController(configPath);
+    public ReloadedInputController(string configPath) => Controller = new VirtualController(configPath);
 
     /// <summary/>
     ~ReloadedInputController() => Dispose();
@@ -51,105 +58,95 @@ public class ReloadedInputController : IController, IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        _controller?.Dispose();
+        Controller?.Dispose();
         GC.SuppressFinalize(this);
     }
 
     /// <summary>
-    /// Launches the Reloaded.Input configuration window.
+    /// Starts an operation to map a specified button using the Reloaded.Input library.
     /// </summary>
-    public void Configure(bool alreadyInWpfApp = false)
+    /// <param name="mappingNo">The unique number. e.g. 0 for button 1, 1 for button 2 corresponding to same action.</param>
+    /// <param name="token">Allows for cancelling the mapping process.</param>
+    /// <param name="callback">Executed after every poll attempt for a key or axis.</param>
+    /// <param name="button">The button to map in the underlying library.</param>
+    public Task<bool> MapButton(Button button, int mappingNo, CancellationToken token = default, Action? callback = null)
     {
-        var buttonNames  = ButtonExtensions.GetNames();
-        var mappings     = new ObservableCollection<MappingEntry>();
-
-        // Map enum to buttons. 
-        for (int x = 0; x < buttonNames.Length; x++)
-        {
-            if (_buttonValues[x] <= 0)
-                continue;
-
-            mappings.Add(new MappingEntry(buttonNames[x], x, MappingType.Button, _buttonValues[x].GetDescription()));
-        }
-
-        // Add stick navigation
-        foreach (var customEntry in _customMapEntries_Stick)
-            mappings.Add(customEntry.Entry);
-
-        // Map enum to triggers. 
-        for (int x = 0; x < buttonNames.Length; x++)
-        {
-            if (_buttonValues[x] <= 0)
-                continue;
-
-            var mappingIndex = x + _triggerMinMappingIndex;
-            mappings.Add(new MappingEntry($"{buttonNames[x]} [Trigger]", mappingIndex, MappingType.Axis, $"[Use This if Mapping to Controller Trigger] {_buttonValues[x].GetDescription()}"));
-        }
-
-        var window = new ConfiguratorWindow(new[]
-        {
-            new ConfiguratorInput("Main Config", _controller.FilePath, mappings)
-        });
-
-        if (!alreadyInWpfApp)
-        {
-            var configurator = new Configurator();
-            configurator.Run(window);
-        }
-        else
-            window.Show();
-
-        _controller?.Dispose();
-        _controller = new VirtualController(_controller.FilePath);
+        return Controller.Map(IndexButtonButtons + (int)button, MappingType.Button, mappingNo, token, callback);
     }
 
-    /// <inheritdoc />
-    public FrameInputs GetInputs()
+    /// <summary>
+    /// Unmaps a button mapped in the underlying library.
+    /// </summary>
+    /// <param name="button">The button to unmap.</param>
+    /// <param name="mappingNo">The mapping number of the button.</param>
+    public void UnMapButton(Button button, int mappingNo) => Controller.UnMap(IndexButtonButtons + (int)button, mappingNo);
+
+    /// <summary>
+    /// Starts an operation to map a specified trigger to a button using the Reloaded.Input library.
+    /// </summary>
+    /// <param name="mappingNo">The unique number. e.g. 0 for button 1, 1 for button 2 corresponding to same action.</param>
+    /// <param name="token">Allows for cancelling the mapping process.</param>
+    /// <param name="callback">Executed after every poll attempt for a key or axis.</param>
+    /// <param name="button">The button to map in the underlying library.</param>
+    public Task<bool> MapTriggerToButton(Button button, int mappingNo, CancellationToken token = default, Action? callback = null)
     {
-        _controller.PollAll();
+        return Controller.Map(IndexTriggerButtons + (int)button, MappingType.Axis, mappingNo, token, callback);
+    }
+
+    /// <summary>
+    /// Unmaps a button mapped in the underlying library.
+    /// </summary>
+    /// <param name="button">The button to unmap.</param>
+    /// <param name="mappingNo">The mapping number of the button.</param>
+    public void UnMapTriggerToButton(Button button, int mappingNo) => Controller.UnMap(IndexTriggerButtons + (int)button, mappingNo);
+
+    /// <summary>
+    /// Starts an operation to map a specified trigger to a button using the Reloaded.Input library.
+    /// </summary>
+    /// <param name="mappingNo">The unique number. e.g. 0 for button 1, 1 for button 2 corresponding to same action.</param>
+    /// <param name="token">Allows for cancelling the mapping process.</param>
+    /// <param name="callback">Executed after every poll attempt for a key or axis.</param>
+    /// <param name="stickEntry">The custom stick entry to map in the underlying library.</param>
+    public Task<bool> MapCustomStickBehaviour(CustomStickMappingEntry stickEntry, int mappingNo, CancellationToken token = default, Action? callback = null)
+    {
+        return Controller.Map(IndexCustomStickMapping + (int)stickEntry, MappingType.Axis, mappingNo, token, callback);
+    }
+
+    /// <summary>
+    /// Unmaps a button mapped in the underlying library.
+    /// </summary>
+    /// <param name="stickEntry">The behaviour to unmap.</param>
+    /// <param name="mappingNo">The mapping number of the button.</param>
+    public void UnMapCustomStickBehaviour(CustomStickMappingEntry stickEntry, int mappingNo) => Controller.UnMap(IndexCustomStickMapping + (int)stickEntry, mappingNo);
+
+    /// <inheritdoc />
+    public virtual FrameInputs GetInputs()
+    {
+        Controller.PollAll();
         var button = Button.None;
 
         // Map returned buttons to the enum
-        for (int x = 0; x < _buttonValues.Length; x++)
+        for (int x = 0; x < ButtonValues.Length; x++)
         {
-            bool isPressed = _controller.GetButton(x);
-            button |= (Button)((int)_buttonValues[x] * Unsafe.As<bool, byte>(ref isPressed));
+            bool isPressed = Controller.GetButton(x);
+            button |= (Button)((int)ButtonValues[x] * Unsafe.As<bool, byte>(ref isPressed));
         }
 
         // Map triggers to the enum.
-        for (int x = 0; x < _buttonValues.Length; x++)
+        for (int x = 0; x < ButtonValues.Length; x++)
         {
-            float axisValue = _controller.GetAxis(_triggerMinMappingIndex + x);
+            float axisValue = Controller.GetAxis(IndexTriggerButtons + x);
             bool isPressed  = axisValue > 0.0f;
-            button |= (Button)((int)_buttonValues[x] * Unsafe.As<bool, byte>(ref isPressed));
+            button |= (Button)((int)ButtonValues[x] * Unsafe.As<bool, byte>(ref isPressed));
         }
 
         // Map stick movement
-        foreach (var customEntry in _customMapEntries_Stick)
+        foreach (var customEntry in CustomStickMappingEntryExtensions.StickCustomMapEntries)
         {
-            float axisValue = _controller.GetAxis(customEntry.Entry.MappingIndex);
+            float axisValue = Controller.GetAxis(customEntry.Entry.MappingIndex);
             button |= customEntry.GetValue(axisValue);
         }
 
         return new FrameInputs(button);
-    }
-}
-
-internal struct StickMappingEntry
-{
-    public const float MinAxis = AxisSet.MaxValue * 0.75f;
-
-    public MappingEntry Entry;
-    public Button ValueOnNegative;
-    public Button ValueOnPositive;
-
-    public Button GetValue(float value)
-    {
-        return value switch
-        {
-            > MinAxis => ValueOnPositive,
-            < -MinAxis => ValueOnNegative,
-            _ => Button.None
-        };
     }
 }
