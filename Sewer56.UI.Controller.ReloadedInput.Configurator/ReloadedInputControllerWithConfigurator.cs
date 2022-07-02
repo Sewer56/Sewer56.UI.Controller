@@ -73,7 +73,7 @@ public class ReloadedInputControllerWithConfigurator : ReloadedInputController
         var window = new ConfiguratorWindow(new[]
         {
             new ConfiguratorInput(_provider!.GetCustomString(MainConfig), Controller.FilePath, mappings)
-        });
+        }, _provider.InternalProvider);
 
         window.Title = _provider!.GetCustomString(WindowName);
         if (!alreadyInWpfApp)

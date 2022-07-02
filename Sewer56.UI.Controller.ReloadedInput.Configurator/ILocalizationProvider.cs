@@ -6,7 +6,7 @@ namespace Sewer56.UI.Controller.ReloadedInput.Configurator;
 /// <summary>
 /// This class provides localization support for a given. 
 /// </summary>
-public interface ILocalizationProvider
+public interface ILocalizationProvider : Reloaded.Input.Configurator.Localization.ILocalizationProvider
 {
     /// <summary>
     /// Tries to get the localized name for the given button.

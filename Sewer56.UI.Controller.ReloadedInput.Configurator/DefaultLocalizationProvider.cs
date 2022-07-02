@@ -8,40 +8,40 @@ namespace Sewer56.UI.Controller.ReloadedInput.Configurator;
 /// </summary>
 internal class DefaultLocalizationProvider
 {
-    private readonly ILocalizationProvider? _internalProvider;
+    internal readonly ILocalizationProvider? InternalProvider;
 
     public DefaultLocalizationProvider(ILocalizationProvider? internalProvider)
     {
-        _internalProvider = internalProvider;
+        InternalProvider = internalProvider;
     }
 
     public string GetName(Button button)
     {
-        var text = _internalProvider?.GetName(button);
+        var text = InternalProvider?.GetName(button);
         return text ?? ReloadedInputController.ButtonNames[(int)button];
     }
 
     public string GetDescription(Button button)
     {
-        var text = _internalProvider?.GetDescription(button);
+        var text = InternalProvider?.GetDescription(button);
         return text ?? ReloadedInputController.ButtonValues[(int)button].GetDescription();
     }
 
     public string GetName(CustomStickMappingEntry entry)
     {
-        var text = _internalProvider?.GetName(entry);
+        var text = InternalProvider?.GetName(entry);
         return text ?? CustomStickMappingEntryExtensions.StickCustomMapEntries[(int)entry].Entry.Name;
     }
 
     public string GetDescription(CustomStickMappingEntry entry)
     {
-        var text = _internalProvider?.GetDescription(entry);
+        var text = InternalProvider?.GetDescription(entry);
         return text ?? CustomStickMappingEntryExtensions.StickCustomMapEntries[(int)entry].Entry.Description;
     }
 
     public string GetCustomString(CustomStrings customString)
     {
-        var text = _internalProvider?.GetCustomString(customString);
+        var text = InternalProvider?.GetCustomString(customString);
         if (text != null)
             return text;
 
