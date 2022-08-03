@@ -128,9 +128,10 @@ public class WpfPlatform : IPlatform, IDisposable
         int itemsInBuffer = 0;
         for (int x = 0; x < spanList.Length; x++)
         {
-            buffer[itemsInBuffer++] = items[x].TransformToAncestor(window!)
+            var item = items[x];
+            buffer[itemsInBuffer++] = item.TransformToAncestor(window!)
                 .Transform(new Point(0, 0))
-                .AsVector() + (element!.RenderSize.AsVector() / 2); // Take element center
+                .AsVector() + (item.RenderSize.AsVector() / 2); // Take element center
         }
 
         return buffer[..itemsInBuffer];
