@@ -19,6 +19,19 @@ public class Navigator
     private DateTime _lastDateTime = DateTime.UtcNow;
 
     /// <summary>
+    /// Specifies the amount of bias towards picking elements based on distance.
+    /// Higher value means selected elements will more likely be based on distance, lower value means less likely.
+    /// Note: Library already has implicit large distance bias as it internally uses distance squared, you can minimize it using this.
+    /// </summary>
+    public float DistanceBias = 1f;
+
+    /// <summary>
+    /// Max selection angle in degrees between current control and new control
+    /// before a control is disqualified as not selectable.
+    /// </summary>
+    public float MaxSelectionAngle = 89f;
+
+    /// <summary>
     /// Creates an instance of the navigator.
     /// </summary>
     /// <param name="platform">Abstracts the platform, e.g. WPF.</param>
@@ -59,14 +72,12 @@ public class Navigator
         // Get button info.
         var direction = state.GetDirectionVector(_platform.FlipX, _platform.FlipY);
         Span<SelectableElement> elements = stackalloc SelectableElement[controlPositions.Length];
-        SelectableElement.Init(pos, direction, controlPositions, elements);
+        SelectableElement.Init(pos, direction, controlPositions, elements, DistanceBias);
 
-        // Sort by angle, select within X degrees and sort by distance.
-        elements.Sort(new SelectableElement.CompareAngleAscending());
-        elements = SelectableElement.SliceByMaxAngleDifference(elements);
-        elements.Sort(new SelectableElement.CompareDistanceAscending());
-
-        _platform.SelectControl(elements[0].Index);
+        // Select element with highest score.
+        var lowest = SelectableElement.GetLowestScore(elements, MaxSelectionAngle);
+        if (lowest.HasValue)
+            _platform.SelectControl(lowest.Value.Index);
     }
 
     /// <summary>
@@ -89,9 +100,8 @@ public class Navigator
 internal struct SelectableElement
 {
     public int Index;
-    public Vector2 Position;
     public float Angle;
-    public float DistanceSquared;
+    public float Score;
 
     /// <summary>
     /// Initializes a set of selectable elements given a list of positions.
@@ -100,68 +110,52 @@ internal struct SelectableElement
     /// <param name="selectionDirection">Direction of user selection.</param>
     /// <param name="positions">The positions of the other elements.</param>
     /// <param name="result">Span that will hold result value.</param>
+    /// <param name="distanceBias">Bias to apply for distance. Default 1.0f. Higher values means controls more likely picked based on distance.</param>
     [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
-    public static void Init(Vector2 currentPosition, Vector2 selectionDirection, Span<Vector2> positions, Span<SelectableElement> result)
+    public static void Init(Vector2 currentPosition, Vector2 selectionDirection, Span<Vector2> positions,
+        Span<SelectableElement> result, float distanceBias = 1.0f)
     {
         for (int x = 0; x < positions.Length; x++)
         {
             ref SelectableElement res = ref result[x];
             res.Index = x;
-            res.Position = positions[x];
 
-            var vecCurrentToTarget = Mathematics.CalculateVector(res.Position, currentPosition);
-            res.Angle = selectionDirection.CalcAngle(vecCurrentToTarget);
-            res.DistanceSquared = vecCurrentToTarget.LengthSquared();
+            var vecCurrentToTarget = Mathematics.CalculateVector(positions[x], currentPosition);
+            var angle    = selectionDirection.CalcAngle(vecCurrentToTarget);
+            var distance = vecCurrentToTarget.LengthSquared();
+            
+            // Just in case.
+            res.Angle = angle;
+            angle += 0.000001f; // This might skew the results a bit, but solves problem with multiplying values too small.
+            distance *= distanceBias;
+            if (distance == 0)
+                distance = float.MinValue;
+
+            res.Score = angle * distance;
         }
     }
 
     /// <summary>
-    /// Returns all selectable elements within the angle range `elements[0].Angle - elements[0].Angle + maxAngleDiff`.
+    /// Returns the element with the lowest score.
     /// </summary>
-    /// <param name="elements">All selectable elements, sorted by angle ascending.</param>
-    /// <param name="maxAngleDiff">Maximum angle difference from lowest in degrees.</param>
-    public static Span<SelectableElement> SliceByMaxAngleDifference(Span<SelectableElement> elements, float maxAngleDiff = 30.0f)
+    [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+    public static SelectableElement? GetLowestScore(Span<SelectableElement> elements, float maxAngle = 89f)
     {
-        if (elements.Length == 1)
-            return elements;
-
-        var maxAngle    = elements[0].Angle + maxAngleDiff;
-        int numElements = 1;
-
-        while (numElements < elements.Length)
+        var result = new SelectableElement()
         {
-            if (elements[numElements].Angle > maxAngle)
-                break;
+            Score = float.MaxValue
+        };
 
-            numElements++;
+        for (int x = 0; x < elements.Length; x++)
+        {
+            var element = elements[x];
+            if (element.Score < result.Score && element.Angle < maxAngle)
+                result = element;
         }
 
-        return elements[..numElements];
-    }
+        if (result.Score != float.MaxValue)
+            return result;
 
-    /// <summary>
-    /// Sorts a number of selectable elements by distance squared ascending
-    /// </summary>
-    public struct CompareDistanceAscending : IComparer<SelectableElement>
-    {
-        public int Compare(SelectableElement x, SelectableElement y)
-        {
-            if (x.DistanceSquared > y.DistanceSquared) return 1;
-            if (x.DistanceSquared < y.DistanceSquared) return -1;
-            return 0;
-        }
-    }
-
-    /// <summary>
-    /// Sorts a number of selectable elements by distance squared ascending
-    /// </summary>
-    public struct CompareAngleAscending : IComparer<SelectableElement>
-    {
-        public int Compare(SelectableElement x, SelectableElement y)
-        {
-            if (x.Angle > y.Angle) return 1;
-            if (x.Angle < y.Angle) return -1;
-            return 0;
-        }
+        return null;
     }
 }
