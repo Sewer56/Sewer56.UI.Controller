@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows;
 using System.Windows.Input;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sewer56.UI.Controller.WPF;
 
@@ -33,7 +34,7 @@ public static class WpfUtilities
     /// <param name="item">Current item in the recursion hierarchy.</param>
     /// <param name="exclude">Item to exclude (if present).</param>
     /// <param name="accumulator">The list that will receive all of the child UI items.</param>
-    public static void FindSelectableChildren(DependencyObject item, UIElement exclude, ref SpanList<UIElement> accumulator) => FindSelectableChildrenEx(item, item, exclude, ref accumulator);
+    public static void FindSelectableChildren(DependencyObject item, UIElement? exclude, ref SpanList<UIElement> accumulator) => FindSelectableChildrenEx(item, item, exclude, ref accumulator);
 
     /// <summary>
     /// Finds all children of the current element using recursion.
@@ -42,7 +43,7 @@ public static class WpfUtilities
     /// <param name="item">Current item in the recursion hierarchy.</param>
     /// <param name="exclude">Item to exclude (if present).</param>
     /// <param name="accumulator">The list that will receive all of the child UI items.</param>
-    public static void FindSelectableChildrenEx(DependencyObject parent, DependencyObject item, UIElement exclude, ref SpanList<UIElement> accumulator)
+    public static void FindSelectableChildrenEx(DependencyObject parent, DependencyObject item, UIElement? exclude, ref SpanList<UIElement> accumulator)
     {
         var children = VisualTreeHelper.GetChildrenCount(item);
         for (int x = 0; x < children; x++)
@@ -113,6 +114,29 @@ public static class WpfUtilities
 
         window = Window.GetWindow(focused);
         return window != null;
+    }
+
+    /// <summary>
+    /// Tries to get the currently focused element and its corresponding window.
+    /// </summary>
+    /// <param name="window">The currently selected window.</param>
+    [SkipLocalsInit]
+    public static bool TryGetFocusedWindow(out Window? window)
+    {
+        window = default;
+
+        // Can only get focused window.
+        foreach (var candidate in Application.Current.Windows)
+        {
+            var windo = candidate as Window;
+            if (windo is { IsActive: true })
+            {
+                window = windo;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

@@ -117,11 +117,11 @@ public class WpfPlatform : IPlatform, IDisposable
     /// <inheritdoc />
     public Span<Vector2> GetSelectableControls(Span<Vector2> buffer)
     {
-        if (!TryGetFocusedElementAndWindow(out var window, out var element))
+        if (!TryGetFocusedElementAndWindow(out var window, out var element) && !TryGetFocusedWindow(out window))
             return buffer[..];
 
         var spanList = new SpanList<UIElement>(_childrenBuffer);
-        FindSelectableChildren(window!, element!, ref spanList);
+        FindSelectableChildren(window!, element, ref spanList);
 
         // Extract positions.
         ref var items = ref spanList.Items;
@@ -149,13 +149,7 @@ public class WpfPlatform : IPlatform, IDisposable
     }
 
     /// <inheritdoc />
-    public bool HasFocus()
-    {
-        if (TryGetFocusedElementAndWindow(out var window, out var element))
-            return window!.IsActive;
-
-        return false;
-    }
+    public bool HasFocus() => TryGetFocusedWindow(out var window);
 
     /// <inheritdoc />
     public void SelectControl(int index)
