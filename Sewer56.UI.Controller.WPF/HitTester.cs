@@ -52,17 +52,6 @@ internal static class HitTester
     /// <returns>The object hit.</returns>
     private static DependencyObject? HitTest(Point position, UIElement container, Type desiredType)
     {
-        DependencyObject? result = null;
-        HitTestResultBehavior ResultCallback(HitTestResult hitTestResult)
-        {
-            bool isDesiredType = hitTestResult.VisualHit.GetType() == desiredType;
-            if (!isDesiredType && WpfUtilities.FindParent(hitTestResult.VisualHit, desiredType) == null)
-                return HitTestResultBehavior.Continue;
-
-            result = hitTestResult.VisualHit;
-            return HitTestResultBehavior.Stop;
-        }
-
         var hitTestResult = container.InputHitTest(position);
         if (hitTestResult is DependencyObject obj && (hitTestResult.GetType() == desiredType || WpfUtilities.FindParent(obj, desiredType) != null))
             return obj;
