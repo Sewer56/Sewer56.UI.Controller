@@ -16,8 +16,11 @@ internal static class HitTester
     /// <param name="container">The container to check if the control is hittable within.</param>
     /// <param name="element">The element to check if it can be hit.</param>
     /// <returns>True if the element can be clicked with the mouse.</returns>
-    internal static bool IsElementClickable(UIElement container, UIElement element)
+    internal static bool IsElementClickable(UIElement container, UIElement? element)
     {
+        if (element == null)
+            return false;
+
         var absolutePos = GetRelativePlacement((FrameworkElement)container, (FrameworkElement)element);
         return IsPointClickable(container, element, new Point(absolutePos.TopLeft.X + 1, absolutePos.TopLeft.Y + 1)) || // Top left
                IsPointClickable(container, element, new Point(absolutePos.BottomLeft.X + 1, absolutePos.BottomLeft.Y - 1)) || // Bottom left

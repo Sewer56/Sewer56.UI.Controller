@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Controls;
 
 namespace Sewer56.UI.Controller.WPF;
 
@@ -39,7 +40,7 @@ public static class WpfUtilities
     /// <summary>
     /// Finds all children of the current element using recursion.
     /// </summary>
-    /// <param name="parent">The parent/root from wihch we are searching from.</param>
+    /// <param name="parent">The parent/root from which we are searching from.</param>
     /// <param name="item">Current item in the recursion hierarchy.</param>
     /// <param name="exclude">Item to exclude (if present).</param>
     /// <param name="accumulator">The list that will receive all of the child UI items.</param>
@@ -52,12 +53,43 @@ public static class WpfUtilities
             if (child == null!)
                 continue;
 
-            if (child is UIElement { Focusable: true, IsVisible: true, IsEnabled: true } uiElement && uiElement != exclude 
-                && HitTester.IsElementClickable((UIElement)parent, uiElement))
-                accumulator.Add(uiElement);
+            if (IsChildSelectable(child, (UIElement?)parent))
+                accumulator.Add((UIElement)child);
 
             FindSelectableChildrenEx(parent, child, exclude, ref accumulator);
         }
+    }
+
+    private static bool IsChildSelectable(DependencyObject? child, UIElement? visualRoot)
+    {
+        // Check type
+        if (child is not UIElement uiElement)
+            return false;
+
+        // Check Properties
+        if (uiElement is not { Focusable: true, IsVisible: true, IsEnabled: true })
+            return false;
+
+        // Okay, we have a tricky situation here and the solution below is a hack.
+        // If we're in a ListView, we can't scroll down if the ListViewItem isn't in view,
+        // but if there's a visual overlay over the screen, then we cannot ignore hit testing.
+        // We're gonna hit test the parent instead.
+        if (uiElement is ListViewItem)
+        {
+            if (!HitTester.IsElementClickable(visualRoot!, FindParent<ListView>(uiElement)))
+                return false;
+        }
+        else if (uiElement is ListBoxItem)
+        {
+            if (!HitTester.IsElementClickable(visualRoot!, FindParent<ListBox>(uiElement)))
+                return false;
+        }
+        else if (!HitTester.IsElementClickable(visualRoot!, uiElement))
+        {
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>
