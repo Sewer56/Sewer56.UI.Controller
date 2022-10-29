@@ -117,11 +117,12 @@ public class WpfPlatform : IPlatform, IDisposable
     /// <inheritdoc />
     public Span<Vector2> GetSelectableControls(Span<Vector2> buffer)
     {
-        if (!TryGetFocusedElementAndWindow(out var window, out var element) && !TryGetFocusedWindow(out window))
+        if (!TryGetFocusedWindow(out var window) || !TryGetFocusedElement(out var element))
             return buffer[..];
 
+        var root = (Visual?)WpfUtilities.GetRoot(element!);
         var spanList = new SpanList<UIElement>(_childrenBuffer);
-        FindSelectableChildren(window!, element, ref spanList);
+        FindSelectableChildren(root!, element, ref spanList);
 
         // Extract positions.
         ref var items = ref spanList.Items;
@@ -129,7 +130,7 @@ public class WpfPlatform : IPlatform, IDisposable
         for (int x = 0; x < spanList.Length; x++)
         {
             var item = items[x];
-            buffer[itemsInBuffer++] = item.TransformToAncestor(window!)
+            buffer[itemsInBuffer++] = item.TransformToAncestor(root!)
                 .Transform(new Point(0, 0))
                 .AsVector() + (item.RenderSize.AsVector() / 2); // Take element center
         }
@@ -140,10 +141,11 @@ public class WpfPlatform : IPlatform, IDisposable
     /// <inheritdoc />
     public Vector2 GetCurrentPosition()
     {
-        if (!TryGetFocusedElementAndWindow(out var window, out var element))
+        if (!TryGetFocusedElement(out var element))
             return new Vector2(0,0);
 
-        return element!.TransformToAncestor(window!)
+        var root = (Visual?)WpfUtilities.GetRoot(element!);
+        return element!.TransformToAncestor(root!)
             .Transform(new Point(0, 0))
             .AsVector() + (element.RenderSize.AsVector() / 2); // Take element center
     }

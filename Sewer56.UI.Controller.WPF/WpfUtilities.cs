@@ -108,6 +108,25 @@ public static class WpfUtilities
     }
 
     /// <summary>
+    /// Walks up the visual tree and gets the rootmost element. If no parent exists, returns self.
+    /// </summary>
+    /// <param name="item">Current item in the visual tree hierarchy.</param>
+    public static DependencyObject? GetRoot(DependencyObject item)
+    {
+        DependencyObject current = item;
+        while (true)
+        {
+            var parent = VisualTreeHelper.GetParent(current);
+            if (parent == null)
+                break;
+
+            current = parent;
+        }
+
+        return current;
+    }
+
+    /// <summary>
     /// Tries to find a parent with a given type in the visual tree hierarchy.
     /// </summary>
     /// <param name="item">Current item in the visual tree hierarchy.</param>
@@ -146,6 +165,17 @@ public static class WpfUtilities
 
         window = Window.GetWindow(focused);
         return window != null;
+    }
+
+    /// <summary>
+    /// Tries to get the currently focused element and its corresponding window.
+    /// </summary>
+    /// <param name="focused">The currently focused element.</param>
+    [SkipLocalsInit]
+    public static bool TryGetFocusedElement(out UIElement? focused)
+    {
+        focused = Keyboard.FocusedElement as UIElement;
+        return focused != null;
     }
 
     /// <summary>
