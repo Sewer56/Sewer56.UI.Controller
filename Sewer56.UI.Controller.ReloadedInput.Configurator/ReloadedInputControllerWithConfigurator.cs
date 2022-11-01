@@ -109,6 +109,6 @@ public class ReloadedInputControllerWithConfigurator : ReloadedInputController
     private void RecreateController()
     {
         Controller?.Dispose();
-        Controller = new VirtualController(Controller!.FilePath);
+        Controller = new VirtualController(Controller!.FilePath, Controller.Implementations);
     }
 }
