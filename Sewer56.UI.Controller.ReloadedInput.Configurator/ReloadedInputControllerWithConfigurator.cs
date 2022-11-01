@@ -19,13 +19,30 @@ public class ReloadedInputControllerWithConfigurator : ReloadedInputController
     {
         _provider = new DefaultLocalizationProvider(null);
     }
-
+    
+    /// <inheritdoc />
+    public ReloadedInputControllerWithConfigurator(string configPath, Reloaded.Input.Implementations.Implementations implementations) : base(configPath, implementations)
+    {
+        _provider = new DefaultLocalizationProvider(null);
+    }
+    
     /// <summary>
     /// Creates a Reloaded.Input with Configurator instance with localization support.
     /// </summary>
     /// <param name="configPath">Path to store the Reloaded.Input configuration.</param>
     /// <param name="provider">Provides support for localization.</param>
     public ReloadedInputControllerWithConfigurator(string configPath, ILocalizationProvider? provider) : base(configPath)
+    {
+        _provider = new DefaultLocalizationProvider(provider);
+    }
+
+    /// <summary>
+    /// Creates a Reloaded.Input with Configurator instance with localization support.
+    /// </summary>
+    /// <param name="configPath">Path to store the Reloaded.Input configuration.</param>
+    /// <param name="provider">Provides support for localization.</param>
+    /// <param name="implementations">Implementations of APIs to enable.</param>
+    public ReloadedInputControllerWithConfigurator(string configPath, ILocalizationProvider? provider, Reloaded.Input.Implementations.Implementations implementations) : base(configPath, implementations)
     {
         _provider = new DefaultLocalizationProvider(provider);
     }

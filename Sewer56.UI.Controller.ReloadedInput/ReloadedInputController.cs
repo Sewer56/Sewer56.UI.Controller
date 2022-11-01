@@ -49,8 +49,15 @@ public class ReloadedInputController : IController, IDisposable
     /// <summary>
     /// Creates a Reloaded.Hooks controller from a given instance.
     /// </summary>
-    /// <param name="configPath"></param>
+    /// <param name="configPath">Path to the controller configuration.</param>
     public ReloadedInputController(string configPath) => Controller = new VirtualController(configPath);
+    
+    /// <summary>
+    /// Creates a Reloaded.Hooks controller from a given instance.
+    /// </summary>
+    /// <param name="configPath">Path to the controller configuration.</param>
+    /// <param name="implementations">The implementations to use for controller input.</param>
+    public ReloadedInputController(string configPath, Reloaded.Input.Implementations.Implementations implementations) => Controller = new VirtualController(configPath, implementations);
 
     /// <summary/>
     ~ReloadedInputController() => Dispose();
