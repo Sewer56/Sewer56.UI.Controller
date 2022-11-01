@@ -16,11 +16,11 @@
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Reloaded.Input.Configurator" Version="2.1.1" />
+    <PackageReference Include="Reloaded.Input.Configurator" Version="2.1.2" />
   </ItemGroup>
 
   <ItemGroup>
